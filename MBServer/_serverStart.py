@@ -1,8 +1,8 @@
-from MRServer import MRServer
+from MBServer import MBServer
 
 def main():
     print("Server starting...")
-    MRServer()
+    MBServer()
     
 
 if __name__ == "__main__":
