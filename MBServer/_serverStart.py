@@ -2,7 +2,7 @@ from MRServer import MRServer
 
 def main():
     print("Server starting...")
-    ServerConsole()
+    MRServer()
     
 
 if __name__ == "__main__":
