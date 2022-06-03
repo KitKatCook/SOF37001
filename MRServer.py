@@ -1,7 +1,7 @@
 import ctypes
 from HTTPServer import HTTPServer
 
-class ServerConsole:
+class MRServer:
     def __init__(self, args = None):
         self.args = args
         

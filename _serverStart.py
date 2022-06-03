@@ -1,4 +1,4 @@
-from ServerConsole import ServerConsole
+from MRServer import MRServer
 
 def main():
     print("Server starting...")
