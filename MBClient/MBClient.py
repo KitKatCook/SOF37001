@@ -1,8 +1,13 @@
 import ctypes
+from MBCommon.Client.Client import Client
 from MBCommon.Client.ClientFactory import ClientFactory
 from MBCommon.Client.ClientType import ClientType
+from MBCommon.Client.Consumer import Consumer
+from MBCommon.Client.Producer import Producer
 
 class MBClient:
+    client: Client
+    
     def __init__(self, args=None):
         self.args = args
 
@@ -35,6 +40,9 @@ class MBClient:
 
     def createClientType(self, clientType):
         if clientType == 1:
-            ClientFactory(ClientType.Producer)
+            self.client = ClientFactory(ClientType.Producer)
         elif clientType == 1:
-            ClientFactory(ClientType.Consumer)
+            self.client = ClientFactory(ClientType.Consumer)
+
+    def sendMessage(self):
+        clientTypeInput = input()
