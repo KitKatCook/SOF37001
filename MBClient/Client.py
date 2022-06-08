@@ -13,5 +13,10 @@ class Client:
         if self.args[0] is None:
             "error"
         
-
         return validate
+
+    def Create(self):
+        return self
+
+    def ImportConfig(self):
+        return self
