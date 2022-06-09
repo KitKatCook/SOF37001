@@ -1,19 +1,20 @@
+import array
 import uuid
 
 class Partition():
     Id: uuid
     TopicId: uuid
-    Offset: int
+    Messages : array
 
-    def __init__(self, topicId):
+    def __init__(self, partitionId, topicId):
         self.TopicId = topicId
-        self.create()
+        self.Id = partitionId
 
-        def create():
-            Id = uuid.uuid4()
+    def AddMessage(self, body):
+        self.__queue.append(body)
 
-        def getOffset(self):
-            return self.Offset
+    def GetMessages(self, offset, amount):
+        return self.Messages[offset:amount]
 
-        def incrementOffset(self):
-            self.Offset += 1
+    def AmountOfMessages(self):
+        return len(self.Messages)

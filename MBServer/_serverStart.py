@@ -1,7 +1,6 @@
 from MBServer import MBServer
 
 def main():
-    print("Server starting...")
     MBServer()
     
 

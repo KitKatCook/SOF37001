@@ -16,7 +16,7 @@ class Client:
         return validate
 
     def Create(self):
-        return self
+        return None
 
     def ImportConfig(self):
-        return self
+        return None
