@@ -26,10 +26,8 @@ class Consumer(Client):
             topic_broker = topics[selection - 1]
             consumer.listen_to_cluster(topic_broker['topic_id'])
 
-
       def GetTopics(self):
         return self.Topics
-
 
       async def ListenOnTopic(self, topicId):
         topic_brokers = [x for x in self.__cluster_info if x["topic_id"] == topic_id]
