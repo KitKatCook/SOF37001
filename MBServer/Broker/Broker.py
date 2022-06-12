@@ -1,14 +1,19 @@
 import json
 from uuid import UUID, uuid3
 from MBServer.Partition.Partition import Partition
+from MBServer.PortFactory import PortCheckerFactory
 
 from MBServer.Topic.Topic import Topic
+from socketserver import TCPServer
 
 class Broker:
+    Id: UUID
     Topics: list[Topic]
-    
+    TCPServer: TCPServer 
+    Port:int
+
     def __init__(self):
-        pass
+        self.port = PortCheckerFactory.GetNextPort()
 
     def AddMessage(self, messageData):
         topicId = UUID(messageData['topicId'])
@@ -29,27 +34,19 @@ class Broker:
 
     def get_messages(self, id, consumer_group_id):
         return self.__get_topic_messages(id, consumer_group_id)
-
-    def AddTopic(self, messageData):
-        topicId = UUID(messageData['Id'])
-        topicName = messageData['name']
-        return {
-            'isDone': self.__service.add_topic(topicId, topicName)
-        }
     
-    def Addtopic(self, topicName):
+    def AddTopic(self, topicName):
         topicId = uuid3()
         topic: Topic = Topic(topicId, topicName) 
         self.Topics.append(topic)
         return self.GetTopicById(topicId)
 
-    def AddPartition(self, messageData):
-        partitionId = UUID(messageData['Id'])
-        topicId = UUID(messageData['topicId'])
-        leader = bool(messageData['leader'])
-        return {
-            'isDone': self.__service.add_partition(topicId, partitionId, leader)
-        }
+    def AddPartition(self, topicId):
+        topic: Topic = self.GetTopicById(topicId)
+        if topic is None:
+            raise("Topic not found")
+        topic.add_partition(topicId)
+        return True
 
     def GetTopicById(self, id):
         topic = [topic for topic in self.Topics if topic.Id == id] 
@@ -57,35 +54,6 @@ class Broker:
             return topic[0]
         return None
 
-
-
-
-
-
-        
-
-        
-
-
-
-
-    def add_topic(self, id, name):
-        topic: Topic = self.__broker.get_topic(id)
-        if topic is None:
-            topic: Topic = Topic(id, name)
-            self.__broker.add_topic(topic)
-        return True
-    
-    def add_partition(self, topic_id, id, leader):
-        topic: Topic = self.__broker.get_topic(topic_id)
-        if topic is None:
-            raise("Topic not found")
-        topic.add_partition(id, leader)
-        return True
-
-    def __get_topic(self, id: UUID):
-        topic: Topic = self.__broker.get_topic(id)
-        return topic.to_object()
         
     def __get_topic_messages(self, id: UUID, consumer_group_id):
         aggregate_messages = []

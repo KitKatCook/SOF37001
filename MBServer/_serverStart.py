@@ -1,8 +1,7 @@
-from MBServer import MBServer
+from Zookeeper.Zookeeper import Zookeeper
 
 def main():
-    MBServer()
+    Zookeeper()
     
-
 if __name__ == "__main__":
     main()

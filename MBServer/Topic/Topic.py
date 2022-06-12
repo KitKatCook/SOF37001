@@ -30,3 +30,15 @@ class Topic:
         if(partition.count > 0):
             return partition[0]
         return None
+
+    def AddPartition(self, topicId):
+        partitionId = uuid.uuid3()
+        partition: Partition = Partition(partitionId, topicId) 
+        self.Partitions.append(partition)
+        return self.GetPartitionById(topicId)
+
+    def GetPartitionById(self, id):
+        partition = [partition for partition in self.Partition if partition.Id == id] 
+        if(partition.count > 0):
+            return partition[0]
+        return None
