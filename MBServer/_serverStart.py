@@ -1,3 +1,5 @@
+import sys, os; 
+sys.path.append(f"{os.getcwd()}/MBServer")
 from Zookeeper.Zookeeper import Zookeeper
 
 def main():

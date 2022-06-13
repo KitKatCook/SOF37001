@@ -1,7 +1,7 @@
 import string
 import uuid
 
-from MBServer.Partition.Partition import Partition
+from Partition.Partition import Partition
 
 class Topic:
     Id: uuid

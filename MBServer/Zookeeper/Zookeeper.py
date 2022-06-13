@@ -17,14 +17,15 @@ class Zookeeper:
     def __init__(self, args = None):
         self.args = args
         
-        self.StartServer()
+        thread = Thread(target=asyncio.run, args=(self.StartServer(),))
+        thread.start()
+        self.PrintMenu()
 
-    def StartServer(self):
+    async def StartServer(self):
         print("Server starting...")
         with socketserver.TCPServer(("", self.Port), http.server.SimpleHTTPRequestHandler) as self.Server:
             print("serving at port", port)
-            self.Server.serve_forever()
-            self.PrintMenu()
+            await self.Server.serve_forever()
 
     def StopServer(self):
         print("Server stopping...")

@@ -1,9 +1,8 @@
 import json
 from uuid import UUID, uuid3
-from MBServer.Partition.Partition import Partition
-from MBServer.PortFactory import PortCheckerFactory
-
-from MBServer.Topic.Topic import Topic
+from Partition.Partition import Partition
+from PortFactory import PortCheckerFactory
+from Topic.Topic import Topic
 from socketserver import TCPServer
 
 class Broker:
