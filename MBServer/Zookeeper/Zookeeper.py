@@ -40,7 +40,7 @@ class Zookeeper:
         print("3. Start Consumer")
         print("9. Stop")
         user_selection = input()
-        self.__command_factory(user_selection)
+        self.MenuSelection(user_selection)
 
     def MenuSelection(self, userInput):
         match userInput:
