@@ -23,17 +23,19 @@ class Broker:
         partition.AddMessage(body)
 
         return True
+   
+    def GetMessages(self, topicId: UUID, groupId: UUID):
+        aggregate_messages = []
+        topic: Topic = self.GetTopicById(topicId)
+        for partition in topic.Partitions:
+            offset = self.__get_consumer_group_offsets(partition.Id, groupId)
+            partition_size = partition.size()
+            messages = partition.get_messages(offset, partition_size)
+            aggregate_messages = aggregate_messages + messages
+            self.__set_consumer_group_offset(partition.id, groupId, partition_size)
+        return aggregate_messages
 
-    def GetMessages(self, messageData):
-        messageId = UUID(messageData['Id'])
-        groupId = UUID(messageData['groupId'])
-        return {
-            'messages': self.__service.get_messages(messageId, groupId)
-        }
 
-    def get_messages(self, id, consumer_group_id):
-        return self.__get_topic_messages(id, consumer_group_id)
-    
     def AddTopic(self, topicName):
         topicId = uuid3()
         topic: Topic = Topic(topicId, topicName) 
@@ -54,17 +56,6 @@ class Broker:
         return None
 
         
-    def __get_topic_messages(self, id: UUID, consumer_group_id):
-        aggregate_messages = []
-        topic: Topic = self.__broker.get_topic(id)
-        for partition in topic.partitions:
-            offset = self.__get_consumer_group_offsets(partition.id, consumer_group_id)
-            partition_size = partition.size()
-            messages = partition.get_messages(offset, partition_size)
-            aggregate_messages = aggregate_messages + messages
-            self.__set_consumer_group_offset(partition.id, consumer_group_id, partition_size)
-        return aggregate_messages
-
     def __get_consumer_group_offsets(self, partition_id, consumer_group_id):
         sender: Sender = Sender(WARDEN_ADDRESS, WARDEN_PORT)
         response = sender.send(Message(GET_CONSUMER_GROUP_OFFSET, {

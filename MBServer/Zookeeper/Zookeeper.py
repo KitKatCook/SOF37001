@@ -2,6 +2,7 @@ import http.server
 import socketserver
 from uuid import uuid3
 from Broker.Broker import Broker
+from MBClient.Consumer import Consumer
 from ServerSetupConfig import *
 from threading import Thread
 import asyncio
@@ -38,6 +39,7 @@ class Zookeeper:
         print("1. Start the broker")
         print("2. Add topic")
         print("3. Start Consumer")
+        print("4. List Topics")
         print("9. Stop")
         user_selection = input()
         self.MenuSelection(user_selection)
@@ -47,9 +49,9 @@ class Zookeeper:
             case "1":
                 self.StartBroker
             case "2":
-                self.__add_topic
+                self.AddTopic
             case "3":
-                self.__start_consumer
+                self.AddConsumer
             case "4":
                 self.ListTopics
             case "9":
@@ -68,7 +70,7 @@ class Zookeeper:
         print("Broker registerd.\n")
 
     def Stop(self):
-        self.__service.delete_all_brokers()
+        self.Brokers = None
         self.StopServer()
 
     def AddTopic(self):
@@ -77,7 +79,7 @@ class Zookeeper:
         if len(brokers) < 1:
             print("No brokers available, please add one from the menu.")
             return
-        print("Please enter the topic name... \n")
+        print("Please enter the topic name: ")
         topicNameInput = input()
     
         if len(topicNameInput) < 1:
@@ -94,11 +96,16 @@ class Zookeeper:
         for broker in self.Brokers:
             print(broker)
 
-    def __start_consumer(self):
-        print("--------- Starting Consumer ---------")
-        print("-----------------------------------")
-        consumer_group_name = input("Please enter consumer group name - ")
-        consumer = Consumer(BROKER_LOCAL_IP, DEFAULT_PORT, consumer_group_name)
+    def ListTopics(self):
+        for broker in self.Brokers:
+            for topic in broker.Topics:
+                print(topic)
+
+
+    def AddConsumer(self):
+        print("Adding Consumer.")
+        groupNameInput = input("Please enter consumer group name:")
+        consumer = Consumer(BROKER_LOCAL_IP, DEFAULT_PORT, groupNameInput)
         self.__consumers.append(consumer)
         topics = consumer.get_topics()
         index = 1
