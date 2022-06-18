@@ -5,7 +5,7 @@ import asyncio
 import sys, os
 
 class Consumer(Client):
-      Topics: list[Topic]
+      Topics: Topic
       
       def __init__(self, args):
             Client.__init__(self, args)
@@ -30,10 +30,10 @@ class Consumer(Client):
         return self.Topics
 
       async def ListenOnTopic(self, topicId):
-        topic_brokers = [x for x in self.__cluster_info if x["topic_id"] == topic_id]
+        topic_brokers = [x for x in self.__cluster_info if x["topic_id"] == topicId]
         while(True):
             for topic_broker in topic_brokers:
-                sender: Sender = Sender(topic_broker['broker_address'], int(topic_broker['broker_port']), BUFFER_SIZE)
+                ClientSender = ClientSender(topic_broker['broker_address'], int(topic_broker['broker_port']), BUFFER_SIZE)
                 response = sender.send(Message(GET_MEESAGES, {
                     "id": topic_id,
                     "consumer_group_id": self.__consumer_group_id
