@@ -1,6 +1,7 @@
 from ClientSetupConfig import *
 from Client import Client
-from MBServer.Topic.Topic import Topic
+from MBCommon.ClientSender import ClientSender
+from MBServer.Topic import Topic
 import asyncio
 import sys, os
 
@@ -33,8 +34,8 @@ class Consumer(Client):
         topic_brokers = [x for x in self.__cluster_info if x["topic_id"] == topicId]
         while(True):
             for topic_broker in topic_brokers:
-                ClientSender = ClientSender(topic_broker['broker_address'], int(topic_broker['broker_port']), BUFFER_SIZE)
-                response = sender.send(Message(GET_MEESAGES, {
+                clientSender = ClientSender(topic_broker['broker_address'], int(topic_broker['broker_port']), 1024)
+                response = clientSender.send(Message(GET_MEESAGES, {
                     "id": topic_id,
                     "consumer_group_id": self.__consumer_group_id
                 }))
