@@ -1,4 +1,4 @@
-from MBServer.Broker.Broker import Broker
+from MBServer.Broker import Broker
 
 def main():
     Broker()

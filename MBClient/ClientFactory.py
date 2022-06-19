@@ -1,5 +1,3 @@
-
-
 from MBClient.Consumer import Consumer
 from MBClient.Producer import Producer
 from MBCommon.Error.Error import Error

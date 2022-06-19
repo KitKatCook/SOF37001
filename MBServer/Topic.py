@@ -1,7 +1,7 @@
 import string
 import uuid
 
-from Partition.Partition import Partition
+from Partition import Partition
 
 class Topic:
     Id: uuid

@@ -1,8 +1,8 @@
 import json
 from uuid import UUID, uuid3
-from Partition.Partition import Partition
+from Partition import Partition
 from PortFactory import PortCheckerFactory
-from Topic.Topic import Topic
+from Topic import Topic
 from socketserver import TCPServer
 
 class Broker:

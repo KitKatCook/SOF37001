@@ -4,6 +4,9 @@ import asyncio
 import sys, os
 from threading import Thread
 
+from MBCommon.ClientSender import ClientSender
+from MBCommon.MBMessage import MBMessage
+
 class Producer():
       def __init__(self):
             self.__cluster_info = self.__get_cluster_info()
@@ -37,11 +40,11 @@ class Producer():
             pass
 
 
+
+
       def __get_cluster_info(self):
-            sender: Sender = Sender(CLUSTER_ADDRESS, CLUSTER_WARDEN_PORT, BUFFER_SIZE)
-            return sender.send(Message(GET_CLUSTER_INFO, {}))
-
-
+            clientSender = ClientSender(LocalAddress, CLUSTER_WARDEN_PORT, 1024)
+            return clientSender.send(MBMessage(GET_CLUSTER_INFO, {}))
 
       def publish(self, topic_id, topic_message, n):
             cluster_info = self.__get_cluster_info()
@@ -64,8 +67,8 @@ class Producer():
 
       async def __add_message(self, topic_id, partition_id, broker, topic_message):
             try:
-                  sender: Sender = Sender(broker['broker_address'], int(broker['broker_port']), BUFFER_SIZE)
-                  response = await sender.send_async( Message(ADD_MEESAGE, {
+                  sender: Sender = Sender(broker['broker_address'], int(broker['broker_port']), 1024)
+                  response = await sender.send_async( MBMessage(ADD_MEESAGE, {
                         "topic_id": topic_id,
                         "partition_id": partition_id,
                         "message": topic_message

@@ -1,6 +1,10 @@
-import sys, os; 
+import sys
+import os
+
 sys.path.append(f"{os.getcwd()}/MBServer")
-from Zookeeper.Zookeeper import Zookeeper
+sys.path.append(f"{os.getcwd()}/MBClient")
+
+from Zookeeper import Zookeeper
 
 def main():
     Zookeeper()

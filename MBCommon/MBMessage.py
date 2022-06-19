@@ -1,7 +1,7 @@
 import json
 import string
 
-class Message:
+class MBMessage:
     body: string
 
     def __init__(self, body):

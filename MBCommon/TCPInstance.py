@@ -7,7 +7,7 @@ from http.client import UnknownProtocol
 import json
 import socketserver
 
-from MBCommon.Message import Message
+from MBCommon.MBMessage import Message
 
 
 class TCPServe():
