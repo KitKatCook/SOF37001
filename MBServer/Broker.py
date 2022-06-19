@@ -1,7 +1,8 @@
 import asyncio
 import json
 import socketserver
-from uuid import UUID, uuid3
+from uuid import UUID, uuid3, uuid4
+import uuid
 import MBRequestHandler
 from Partition import Partition
 from PortFactory import PortCheckerFactory
@@ -25,7 +26,7 @@ class Broker:
     def __init__(self, id):
         self.Id = id
         self.PortCheckerFactory = PortCheckerFactory()
-
+        self.Topics = []
         self.Port = self.PortCheckerFactory.GetNextPort()
         WorkerThread = Thread(target=asyncio.run, args=(self.StartServer(),))
         WorkerThread.start()
@@ -59,10 +60,10 @@ class Broker:
 
 
     def AddTopic(self, topicName):
-        topicId = uuid3()
+        topicId = uuid4()
         topic: Topic = Topic(topicId, topicName) 
         self.Topics.append(topic)
-        return self.GetTopicById(topicId)
+        return self.GetTopicById(topic.Id)
 
     def AddPartition(self, topicId):
         topic: Topic = self.GetTopicById(topicId)
@@ -72,8 +73,8 @@ class Broker:
         return True
 
     def GetTopicById(self, id):
-        topic = [topic for topic in self.Topics if topic.Id == id] 
-        if(topic.count > 0):
+        topic = [topic for topic in self.Topics if topic.Id == id]
+        if(len(topic) > 0):
             return topic[0]
         return None
 

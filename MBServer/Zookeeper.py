@@ -1,8 +1,12 @@
+from concurrent.futures import thread
 import http.server
+import os
 import socketserver
+import time
 from uuid import uuid4
 
 from Consumer import Consumer
+from MBRepository import MBRepository
 import ServerSetupConfig
 from Broker import Broker
 from ServerSetupConfig import *
@@ -17,6 +21,7 @@ class Zookeeper:
     Server: TCPServer
     Brokers: list[Broker]
     Consumers: list[Consumer]
+    Repository: MBRepository
 
     def __init__(self, args = None):
         self.args = args
@@ -24,6 +29,7 @@ class Zookeeper:
         self.Consumers = []
         thread = Thread(target=asyncio.run, args=(self.StartServer(),))
         thread.start()
+        self.CreateDBTables()
         self.PrintMenu()
 
     async def StartServer(self):
@@ -32,11 +38,14 @@ class Zookeeper:
             print("serving at port", self.Port)
             await self.Server.serve_forever()
 
+    def CreateDBTables(self):
+        self.Repository = MBRepository()
+        self.Repository.CreateTables()
+
     def StopServer(self):
         print("Server stopping...")
         self.Server.shutdown
         print("Server stopped.")
-        
 
     def PrintMenu(self):
         print("\nPlease select one of the following options:")
@@ -52,19 +61,23 @@ class Zookeeper:
         match userInput:
             case "1":
                 self.StartBroker()
+                self.PrintMenu()
             case "2":
                 self.AddTopic()
+                self.PrintMenu()
             case "3":
-                self.AddConsumer(self)
+                self.AddConsumer()
+                self.PrintMenu()
             case "4":
-                self.ListTopics(self)
+                self.ListTopics()
+                self.PrintMenu()
             case "9":
-                self.__stop
+                self.Stop()
             case _:
                 print("Incorrect choice please try again...")
                 self.PrintMenu()
-
-        self.PrintMenu()
+    
+        
 
     def StartBroker(self):
         print("Broker starting\n")
@@ -79,8 +92,7 @@ class Zookeeper:
 
     def AddTopic(self):
         print("Adding Topic.")
-        brokers = self.Brokers()
-        if len(brokers) < 1:
+        if len(self.Brokers) < 1:
             print("No brokers available, please add one from the menu.")
             return
         print("Please enter the topic name: ")
@@ -92,9 +104,10 @@ class Zookeeper:
 
         topic = self.Brokers[0].AddTopic(topicNameInput)
         if topic is None:
-            print("Error addoing topic to brokers")
+            print("Error adding topic to brokers")
         else:
             print("Topic " + topicNameInput + " added")
+            self.Repository.AddTopic(topic.Id, topic.Name)
 
     def ListBrokers(self):
         for broker in self.Brokers:
@@ -103,7 +116,7 @@ class Zookeeper:
     def ListTopics(self):
         for broker in self.Brokers:
             for topic in broker.Topics:
-                print(topic)
+                print(topic.Name)
 
     def AddConsumer(self):
         print("Adding Consumer.\n")

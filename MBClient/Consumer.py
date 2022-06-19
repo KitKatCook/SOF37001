@@ -6,24 +6,26 @@ import asyncio
 
 class Consumer():
       Topics: Topic
-      
-      def __init__(self, args):
+      BrokerPort: int
+
+      def __init__(self, brokerPort):
             print("I am a Consumer")
+            self.Create(self)
 
       def sendMessage(self, message):
             return message
 
       def Create(self):
             groupNameInput = input('Please enter a consumer group name...\n')
-            consumer = Consumer(localAddress, port, groupNameInput)
-            topics = consumer.getTopics()
+            
+            topics = self.getTopics()
             i = 1
             for topic in topics:
                   topic.Print()
                   i += 1
             selection = int(input("Please select a topic..."))
             topic_broker = topics[selection - 1]
-            consumer.listen_to_cluster(topic_broker['topic_id'])
+            self.ListenOnTopic(topic_broker['topic_id'])
 
       def GetTopics(self):
         return self.Topics
@@ -32,7 +34,7 @@ class Consumer():
         topic_brokers = [x for x in self.__cluster_info if x["Id"] == topicId]
         while(True):
             for topic_broker in topic_brokers:
-                clientSender = ClientSender(topic_broker['broker_address'], int(topic_broker['broker_port']), 1024)
+                clientSender = ClientSender(localAddress, self.BrokerPort)
                 response = clientSender.send(MBMessage(GET_MEESAGES, {
                     "id": topic_id,
                     "consumer_group_id": self.__consumer_group_id

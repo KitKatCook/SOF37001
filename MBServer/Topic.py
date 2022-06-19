@@ -8,8 +8,8 @@ class Topic:
     Name: string
     Partitions: list[Partition]
 
-    def __init__(self, name, noPartitions = 1):
-        self.Id = uuid.uuid4()
+    def __init__(self, id, name, noPartitions = 1):
+        self.Id = id
         self.Name = name
 
     def getId(self):
