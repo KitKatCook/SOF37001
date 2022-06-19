@@ -1,18 +1,40 @@
+import asyncio
 import json
+import socketserver
 from uuid import UUID, uuid3
+import MBRequestHandler
 from Partition import Partition
 from PortFactory import PortCheckerFactory
 from Topic import Topic
 from socketserver import TCPServer
+
+
+from ServerSetupConfig import *
+from threading import Thread
+from socketserver import TCPServer
+import http.server
 
 class Broker:
     Id: UUID
     Topics: list[Topic]
     TCPServer: TCPServer 
     Port:int
+    WorkerThread: Thread
+    PortCheckerFactory: PortCheckerFactory
 
-    def __init__(self):
-        self.port = PortCheckerFactory.GetNextPort()
+    def __init__(self, id):
+        self.Id = id
+        self.PortCheckerFactory = PortCheckerFactory()
+
+        self.Port = self.PortCheckerFactory.GetNextPort()
+        WorkerThread = Thread(target=asyncio.run, args=(self.StartServer(),))
+        WorkerThread.start()
+        
+    async def StartServer(self):
+        print("Broker starting...")
+        with socketserver.TCPServer(("", self.Port), MBRequestHandler) as self.Server:
+            print("serving at port", self.Port)
+            await self.Server.serve_forever()
 
     def AddMessage(self, messageData):
         topicId = UUID(messageData['topicId'])

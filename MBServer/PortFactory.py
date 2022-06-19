@@ -4,10 +4,10 @@ from http.server import BaseHTTPRequestHandler
 from socketserver import TCPServer
 
 class PortCheckerFactory():
-    PortsInUse = list[int]
+    PortsInUse = []
 
     def GetNextPort(self):
-        for p in range(port, (port + 1000)):
+        for p in range(port+1, (port + 1000)):
             try:
                 with TCPServer(('', p), BaseHTTPRequestHandler) as s:
                     s.server_close()
@@ -16,7 +16,7 @@ class PortCheckerFactory():
                 else:
                     self.PortsInUse.append(port)
                 return p
-            except OSError:
+            except OSError: 
                 pass
             
             raise OSError("Port {} is already in use.".format(p))

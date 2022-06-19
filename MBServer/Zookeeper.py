@@ -1,10 +1,10 @@
 import http.server
 import socketserver
-from uuid import uuid3
+from uuid import uuid4
 
-from MBClient.Consumer import Consumer
-from MBServer import ServerSetupConfig
-from MBServer.Broker import Broker
+from Consumer import Consumer
+import ServerSetupConfig
+from Broker import Broker
 from ServerSetupConfig import *
 from threading import Thread
 import asyncio
@@ -12,7 +12,7 @@ from socketserver import TCPServer
 
 
 class Zookeeper:
-    Port: int = ServerSetupConfig._port
+    Port: int = ServerSetupConfig.port
     ServerThread: Thread
     Server: TCPServer
     Brokers: list[Broker]
@@ -20,7 +20,8 @@ class Zookeeper:
 
     def __init__(self, args = None):
         self.args = args
-        
+        self.Brokers = []
+        self.Consumers = []
         thread = Thread(target=asyncio.run, args=(self.StartServer(),))
         thread.start()
         self.PrintMenu()
@@ -50,13 +51,13 @@ class Zookeeper:
     def MenuSelection(self, userInput):
         match userInput:
             case "1":
-                self.StartBroker
+                self.StartBroker()
             case "2":
-                self.AddTopic
+                self.AddTopic()
             case "3":
-                self.AddConsumer
+                self.AddConsumer(self)
             case "4":
-                self.ListTopics
+                self.ListTopics(self)
             case "9":
                 self.__stop
             case _:
@@ -67,7 +68,7 @@ class Zookeeper:
 
     def StartBroker(self):
         print("Broker starting\n")
-        id = uuid3()
+        id = uuid4()
         broker = Broker(id)
         self.Brokers.append(broker)
         print("Broker registerd.\n")
@@ -107,7 +108,7 @@ class Zookeeper:
     def AddConsumer(self):
         print("Adding Consumer.\n")
         groupNameInput = input("Please enter consumer group name:")
-        newConsumer = Consumer(ServerSetupConfig._localAddress, self.Port, groupNameInput)
+        newConsumer = Consumer(ServerSetupConfig.localAddress, self.Port, groupNameInput)
         self.Consumers.append(newConsumer)
         topics = newConsumer.GetTopics()
         
@@ -117,10 +118,12 @@ class Zookeeper:
             print(topicIndex + ": " + topic)
             topicIndex += 1
 
-        topicSelectionInput = (int(input("\nPlease select a topic."))) - 1
-        topic_broker = topics[topicSelectionInput]
+        print("\nPlease select a topic.")
+        topicSelectionInput = self.GetMenuInput(self) - 1;
+        
+        selectedTopic = topics[topicSelectionInput]
 
-        consumer_thread = Thread(target=asyncio.run, args=(newConsumer.ListenOnTopic(topic_broker["Id"]),))
+        consumer_thread = Thread(target=asyncio.run, args=(newConsumer.ListenOnTopic(selectedTopic["Id"]),))
         consumer_thread.start()
         print("Consumer created.\n")
 
@@ -131,3 +134,5 @@ class Zookeeper:
         except ValueError:
             print("Incorrect input! Please try again \n")
             return self.GetMenuInput()
+
+

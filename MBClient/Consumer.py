@@ -1,15 +1,13 @@
 from ClientSetupConfig import *
-from Client import Client
-from MBCommon.ClientSender import ClientSender
-from MBServer.Topic import Topic
+from ClientSender import ClientSender
+from MBMessage import MBMessage
+from Topic import Topic
 import asyncio
-import sys, os
 
-class Consumer(Client):
+class Consumer():
       Topics: Topic
       
       def __init__(self, args):
-            Client.__init__(self, args)
             print("I am a Consumer")
 
       def sendMessage(self, message):
@@ -17,7 +15,7 @@ class Consumer(Client):
 
       def Create(self):
             groupNameInput = input('Please enter a consumer group name...\n')
-            consumer = Consumer(address, port, groupNameInput)
+            consumer = Consumer(localAddress, port, groupNameInput)
             topics = consumer.getTopics()
             i = 1
             for topic in topics:
@@ -31,11 +29,11 @@ class Consumer(Client):
         return self.Topics
 
       async def ListenOnTopic(self, topicId):
-        topic_brokers = [x for x in self.__cluster_info if x["topic_id"] == topicId]
+        topic_brokers = [x for x in self.__cluster_info if x["Id"] == topicId]
         while(True):
             for topic_broker in topic_brokers:
                 clientSender = ClientSender(topic_broker['broker_address'], int(topic_broker['broker_port']), 1024)
-                response = clientSender.send(Message(GET_MEESAGES, {
+                response = clientSender.send(MBMessage(GET_MEESAGES, {
                     "id": topic_id,
                     "consumer_group_id": self.__consumer_group_id
                 }))

@@ -1,4 +1,3 @@
-from Client import Client
 from ClientSetupConfig import *
 import asyncio
 import sys, os
