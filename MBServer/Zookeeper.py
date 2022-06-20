@@ -1,5 +1,6 @@
 from concurrent.futures import thread
 import http.server
+from operator import indexOf
 import os
 import socketserver
 import time
@@ -7,6 +8,7 @@ from uuid import uuid4
 
 from Consumer import Consumer
 from MBRepository import MBRepository
+from MBRequestHandler import MBRequestHandler
 import ServerSetupConfig
 from Broker import Broker
 from ServerSetupConfig import *
@@ -34,7 +36,7 @@ class Zookeeper:
 
     async def StartServer(self):
         print("Server starting...")
-        with socketserver.TCPServer(("", self.Port), http.server.SimpleHTTPRequestHandler) as self.Server:
+        with socketserver.TCPServer(("", self.Port), MBRequestHandler) as self.Server:
             print("serving at port", self.Port)
             await self.Server.serve_forever()
 
@@ -53,6 +55,7 @@ class Zookeeper:
         print("2. Add topic")
         print("3. Start Consumer")
         print("4. List Topics")
+        print("4. List Messages")
         print("9. Stop")
         user_selection = input()
         self.MenuSelection(user_selection)
@@ -71,6 +74,9 @@ class Zookeeper:
             case "4":
                 self.ListTopics()
                 self.PrintMenu()
+            case "5":
+                self.ListMessages()
+                self.PrintMenu()
             case "9":
                 self.Stop()
             case _:
@@ -84,6 +90,9 @@ class Zookeeper:
         id = uuid4()
         broker = Broker(id)
         self.Brokers.append(broker)
+
+        self.Repository.AddBroker(broker.Id, broker.Port)
+
         print("Broker registerd.\n")
 
     def Stop(self):
@@ -109,6 +118,12 @@ class Zookeeper:
             print("Topic " + topicNameInput + " added")
             self.Repository.AddTopic(topic.Id, topic.Name)
 
+            for partition in topic.Partitions:
+
+                partitionId:uuid4 = partition.Id
+
+                self.Repository.AddPartition(partitionId, topic.Id)
+
     def ListBrokers(self):
         for broker in self.Brokers:
             print(broker)
@@ -117,6 +132,13 @@ class Zookeeper:
         for broker in self.Brokers:
             for topic in broker.Topics:
                 print(topic.Name)
+
+    def ListMessages(self):
+        for broker in self.Brokers:
+            for topic in broker.Topics:
+                for partition in topic.Partitions:
+                    for message in partition.Messages:
+                        print("Topic: " + topic.Name + "- Partition " + str(topic.Partitions.index(partition) + 1) +": Message - " + message)
 
     def AddConsumer(self):
         print("Adding Consumer.\n")

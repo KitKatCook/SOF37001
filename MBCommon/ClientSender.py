@@ -1,4 +1,5 @@
 import json
+import socket
 import string
 
 class ClientSender():
@@ -10,11 +11,13 @@ class ClientSender():
         self.Port = port
 
     def Send(self, message):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket:
-                socket.connect((self.address, self.port))
-                jsonData = self.ToJSON(self.ToJSON(message))
-                socket.sendall(jsonData)
-                data = socket.recv(1024)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as mbsocket:
+                mbsocket.connect((self.Address, self.Port))
+                jsonData = json.dumps(message, default=lambda o: o.__dict__, sort_keys=True, indent=4).encode()
+                print(jsonData)
+                mbsocket.sendall(jsonData)
+                data = mbsocket.recv(1024)
+                print(data)
                 responseString = str(data.decode('UTF-8'))
                 response = json.loads(responseString)
                 if response['status'] == 200:
@@ -22,5 +25,3 @@ class ClientSender():
                 else:
                     raise Exception(response['error'])
 
-    def ToJSON(message):
-        return message.toJSON().encode()

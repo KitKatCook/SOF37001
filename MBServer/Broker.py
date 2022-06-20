@@ -1,49 +1,49 @@
 import asyncio
 import json
-import socketserver
 from uuid import UUID, uuid3, uuid4
 import uuid
-import MBRequestHandler
+from BrokerRequestHandler import BrokerRequestHandler
 from Partition import Partition
 from PortFactory import PortCheckerFactory
 from Topic import Topic
-from socketserver import TCPServer
-
-
 from ServerSetupConfig import *
 from threading import Thread
 from socketserver import TCPServer
-import http.server
 
 class Broker:
     Id: UUID
     Topics: list[Topic]
-    TCPServer: TCPServer 
     Port:int
     WorkerThread: Thread
     PortCheckerFactory: PortCheckerFactory
+    TCPserver: TCPServer
 
     def __init__(self, id):
         self.Id = id
         self.PortCheckerFactory = PortCheckerFactory()
         self.Topics = []
-        self.Port = self.PortCheckerFactory.GetNextPort()
+        self.Port = 2700 #self.PortCheckerFactory.GetNextPort()
         WorkerThread = Thread(target=asyncio.run, args=(self.StartServer(),))
         WorkerThread.start()
         
     async def StartServer(self):
         print("Broker starting...")
-        with socketserver.TCPServer(("", self.Port), MBRequestHandler) as self.Server:
-            print("serving at port", self.Port)
-            await self.Server.serve_forever()
+        with TCPServer(("", self.Port), BrokerRequestHandler) as self.TCPserver:
+            self.TCPserver.Broker = self
+            try:
+                print("serving at port", self.Port)
+                await self.TCPserver.serve_forever()
+            except Exception as e:
+                print(e)
 
     def AddMessage(self, messageData):
         topicId = UUID(messageData['topicId'])
-        partitionId = UUID(messageData['partitionId'])
         body = messageData['message']
         topic: Topic = self.GetTopicById(topicId)
-        partition: Partition = topic.GetPartitionById(partitionId)
-        partition.AddMessage(body)
+
+        for partition in topic.Partitions:
+            partition.AddMessage(body)
+        
 
         return True
    

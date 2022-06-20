@@ -1,19 +1,18 @@
+from uuid import UUID
 from ClientSetupConfig import *
 from ClientSender import ClientSender
-from MBMessage import MBMessage
+from MBRepository import MBRepository
+from Partition import Partition
 from Topic import Topic
 import asyncio
 
 class Consumer():
-      Topics: Topic
-      BrokerPort: int
+      Repositity: MBRepository
+      GroupId: UUID
 
-      def __init__(self, brokerPort):
-            print("I am a Consumer")
+      def __init__(self):
+            self.Repositity = MBRepository()
             self.Create(self)
-
-      def sendMessage(self, message):
-            return message
 
       def Create(self):
             groupNameInput = input('Please enter a consumer group name...\n')
@@ -28,17 +27,34 @@ class Consumer():
             self.ListenOnTopic(topic_broker['topic_id'])
 
       def GetTopics(self):
-        return self.Topics
+            topics: list[Topic] = []
+            topicsData = self.Repositity.GetAllTopics()
+            partitions = self.Repositity.GetAllPartitions()
+
+            for topicData in topicsData:
+                  topic = Topic(topicData[0], topicData[1])
+                  
+                  topic.Partitions = []
+                  topicPartitions = [x for x in partitions if x[1] == topic.Id]
+                  for partition in topicPartitions:
+                        topic.Partitions.append(Partition(partition[0],partition[1]))
+
+                  topics.append(topic)
+            return topics
+
+      def GetBrokerPort(self):
+            brokerData = self.Repositity.GetAllBroker()
+            return brokerData[0][0]
 
       async def ListenOnTopic(self, topicId):
         topic_brokers = [x for x in self.__cluster_info if x["Id"] == topicId]
         while(True):
             for topic_broker in topic_brokers:
                 clientSender = ClientSender(localAddress, self.BrokerPort)
-                response = clientSender.send(MBMessage(GET_MEESAGES, {
-                    "id": topic_id,
-                    "consumer_group_id": self.__consumer_group_id
-                }))
+                response = clientSender.send({
+                    "topicId": topicId,
+                    "groupId": self.GroupId
+                })
                 if (len(response['messages']) > 0):
                     print(self.__consumer_group_name)
                     print(len(response['messages']))

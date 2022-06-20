@@ -1,23 +1,29 @@
 import string
-import uuid
+from uuid import UUID, uuid3, uuid4
 
 from Partition import Partition
 
 class Topic:
-    Id: uuid
+    Id: UUID
     Name: string
     Partitions: list[Partition]
 
-    def __init__(self, id, name, noPartitions = 1):
+    def __init__(self, id, name, partitions = None):
         self.Id = id
         self.Name = name
+
+        if partitions == None:
+            self.CreatePartitions()
+        else: 
+            self.Partitions = partitions
 
     def getId(self):
         return self.Id
 
-    def createPartitions(self):
-        for parition in range(self.noPartitions):
-            self.Partitions.append(Partition(self.Id))
+    def CreatePartitions(self):
+        self.Partitions = []
+        for parition in range(1):
+            self.Partitions.append(Partition(uuid4(), self.Id))
 
     def PrintSelf(self, log = False):
         if log:
@@ -32,7 +38,7 @@ class Topic:
         return None
 
     def AddPartition(self, topicId):
-        partitionId = uuid.uuid3()
+        partitionId = uuid4()
         partition: Partition = Partition(partitionId, topicId) 
         self.Partitions.append(partition)
         return self.GetPartitionById(topicId)
