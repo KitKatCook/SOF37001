@@ -52,6 +52,7 @@ class Consumer():
             for topic_broker in topic_brokers:
                 clientSender = ClientSender(localAddress, self.BrokerPort)
                 response = clientSender.send({
+                    "command": "pull",
                     "topicId": topicId,
                     "groupId": self.GroupId
                 })

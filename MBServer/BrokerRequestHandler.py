@@ -7,7 +7,11 @@ class BrokerRequestHandler(socketserver.BaseRequestHandler):
         try:
             data = str(self.data.decode("utf-8"))
             jsonData = json.loads(data)
-            self.server.Broker.AddMessage(jsonData)
+
+            if jsonData["command"] == "pull":
+                self.server.Broker.GetMessage(jsonData["topicId"], jsonData["groupId"] )
+            else:
+                self.server.Broker.AddMessage(jsonData)
                        
             jsonResponse = json.dumps(jsonData)
 
