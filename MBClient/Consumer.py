@@ -1,4 +1,5 @@
-from uuid import UUID
+from threading import Thread
+from uuid import UUID, uuid4
 from ClientSetupConfig import *
 from ClientSender import ClientSender
 from MBRepository import MBRepository
@@ -9,22 +10,40 @@ import asyncio
 class Consumer():
       Repositity: MBRepository
       GroupId: UUID
-
+      WorkerThread: Thread
+      
       def __init__(self):
             self.Repositity = MBRepository()
-            self.Create(self)
+            self.Create()
+           
 
       def Create(self):
             groupNameInput = input('Please enter a consumer group name...\n')
             
-            topics = self.getTopics()
+            groups = self.Repositity.GetAllGroups()
+            exists = True
+            for group in groups:
+                  if group[1] == groupNameInput:
+                        exists = False 
+                        self.GroupId = group[0]  
+
+            if exists:
+                  groupId = uuid4()
+                  self.Repositity.AddGroup(groupId, groupNameInput)
+                  self.GroupId = groupId
+            
+            topics = self.GetTopics()
+            
             i = 1
-            for topic in topics:
-                  topic.Print()
+            for t in topics:
+                  print(str(i) +": " + t.Name)
                   i += 1
+
             selection = int(input("Please select a topic..."))
-            topic_broker = topics[selection - 1]
-            self.ListenOnTopic(topic_broker['topic_id'])
+            topic = topics[selection - 1]
+
+            self.WorkerThread = Thread(target=asyncio.run, args=(self.ListenOnTopic(topic.Id),))
+            self.WorkerThread.start()
 
       def GetTopics(self):
             topics: list[Topic] = []
@@ -47,16 +66,15 @@ class Consumer():
             return brokerData[0][0]
 
       async def ListenOnTopic(self, topicId):
-        topic_brokers = [x for x in self.__cluster_info if x["Id"] == topicId]
+        topic = [x for x in self.GetTopics() if x.Id == topicId][0]
         while(True):
-            for topic_broker in topic_brokers:
+            for partition in topic.Partitions:
                 clientSender = ClientSender(localAddress, self.BrokerPort)
-                response = clientSender.send({
+                response = clientSender.Send({
                     "command": "pull",
                     "topicId": topicId,
                     "groupId": self.GroupId
                 })
                 if (len(response['messages']) > 0):
-                    print(self.__consumer_group_name)
                     print(len(response['messages']))
             await asyncio.sleep(1)

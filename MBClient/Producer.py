@@ -20,8 +20,8 @@ class Producer():
             brokerPort = self.GetBrokerPort()
             topics = self.GetTopics()
             index = 1
-            for info in topics:
-                  print(str(index) +": " + info.Name)
+            for t in topics:
+                  print(str(index) +": " + t.Name)
                   index += 1
             
             topicInput = int(input("Please select a topic. \n")) -1

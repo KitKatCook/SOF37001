@@ -12,13 +12,13 @@ class Partition():
         self.TopicId = topicId
         self.Id = partitionId
         self.Messages = []
-        self.Offset 
+        self.Offset = {}
 
     def AddMessage(self, body):
         self.Messages.append(body)
 
     def GetMessages(self, groupId):
-        mesages = None
+        messages = None
         offset = 0
         size = len(self.Messages)
         if groupId in self.Offset.keys:

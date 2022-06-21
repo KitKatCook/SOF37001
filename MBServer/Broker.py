@@ -79,14 +79,8 @@ class Broker:
         return None
 
         
-    def __get_consumer_group_offsets(self, partition_id, consumer_group_id):
-        sender: Sender = Sender(WARDEN_ADDRESS, WARDEN_PORT)
-        response = sender.send(Message(GET_CONSUMER_GROUP_OFFSET, {
-                "partition_id": str(partition_id),
-                "broker_id": str(self.__broker.id),
-                "consumer_group_id": str(consumer_group_id),
-            }))
-        return int(response['offset'])
+    def GetGroupOffset(self, topicId, groupId):
+        topic = self.GetTopicById(topicId)
         
     def __set_consumer_group_offset(self, partition_id, consumer_group_id, offset):
         sender: Sender = Sender(WARDEN_ADDRESS, WARDEN_PORT)
