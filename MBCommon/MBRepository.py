@@ -11,10 +11,13 @@ class MBRepository:
         conn = sqlite3.connect('MBData.sqlite')
         
         cur = conn.cursor()
-
-        cur.execute(F"DROP TABLE Topic")
-        cur.execute(F"DROP TABLE Partition")
-        cur.execute(F"DROP TABLE Broker")
+        
+        try:
+            cur.execute(F"DROP TABLE Topic")
+            cur.execute(F"DROP TABLE Partition")
+            cur.execute(F"DROP TABLE Broker")
+        except:
+            pass
 
         cur.execute(f"CREATE TABLE Topic (Id UNIQUEIDENTIFIER, Name VARCHAR)")
         conn.commit()

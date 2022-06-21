@@ -53,7 +53,6 @@ class Zookeeper:
         print("\nPlease select one of the following options:")
         print("1. Start the broker")
         print("2. Add topic")
-        print("3. Start Consumer")
         print("4. List Topics")
         print("4. List Messages")
         print("9. Stop")
