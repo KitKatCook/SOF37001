@@ -16,6 +16,7 @@ class MBRepository:
             cur.execute(F"DROP TABLE Topic")
             cur.execute(F"DROP TABLE Partition")
             cur.execute(F"DROP TABLE Broker")
+            cur.execute(F"DROP TABLE UserGroup")
         except:
             pass
 
@@ -26,6 +27,9 @@ class MBRepository:
         conn.commit()
 
         cur.execute(f"CREATE TABLE Broker (Id UNIQUEIDENTIFIER, Port INT)")
+        conn.commit()
+
+        cur.execute(f"CREATE TABLE UserGroup (Id UNIQUEIDENTIFIER, Name VARCHAR)")
         conn.commit()
 
     def AddTopic(self, id, name):
@@ -54,4 +58,14 @@ class MBRepository:
     def GetAllBroker(self):
         cur = self.conn.cursor()
         cur.execute("SELECT * FROM Broker")
+        return cur.fetchall()
+
+
+    def AddGroup(self, id, name):
+        self.conn.execute(f"INSERT INTO UserGroup (Id, Name) VALUES ('{id}', '{name}')")
+        self.conn.commit()
+
+    def GetAllGroups(self):
+        cur = self.conn.cursor()
+        cur.execute("SELECT * FROM UserGroup")
         return cur.fetchall()
