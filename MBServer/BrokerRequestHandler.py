@@ -11,7 +11,7 @@ class BrokerRequestHandler(socketserver.BaseRequestHandler):
             if "command" in jsonData:
                 if jsonData["command"] == "pull":
                     self.messages = self.server.Broker.GetMessages(jsonData["topicId"], jsonData["groupId"] )
-                    jsonResponse = json.dumps({ "messages": self.messages })       
+                    jsonResponse = json.dumps({ "code": 200, "message": self.messages })       
                     self.request.sendall(jsonResponse.encode())
             else:
                 self.server.Broker.AddMessage(jsonData)
@@ -19,5 +19,5 @@ class BrokerRequestHandler(socketserver.BaseRequestHandler):
                 self.request.sendall(jsonResponse.encode())
             
         except Exception as exception:
-            jsonResponse = json.dumps({ "code": 500, "message": ("BrokerRequestHandler error") })
+            jsonResponse = json.dumps({ "code": 500, "message": ("BrokerRequestHandler Error: " + exception.args) })
             self.request.sendall(jsonResponse.encode())

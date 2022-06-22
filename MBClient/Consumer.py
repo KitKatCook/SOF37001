@@ -1,3 +1,4 @@
+import string
 from threading import Thread
 from uuid import UUID, uuid4
 from ClientSetupConfig import *
@@ -12,15 +13,22 @@ class Consumer():
       GroupId: UUID
       WorkerThread: Thread
       BrokerPort: int
-      def __init__(self):
+      GroupName : string
+
+      def __init__(self, groupName = None):
             self.Repositity = MBRepository()
             self.BrokerPort = self.GetBrokerPort()
+            self.GroupName = groupName
             self.Create()
            
 
       def Create(self):
-            groupNameInput = input('Please enter a consumer group name...\n')
-            
+            groupNameInput = ""
+            if self.GroupName is None:
+                  groupNameInput = input('Please enter a consumer group name...\n')
+            else:
+                 groupNameInput = self.GroupName
+
             groups = self.Repositity.GetAllGroups()
             exists = True
             for group in groups:
@@ -43,8 +51,14 @@ class Consumer():
             selection = int(input("Please select a topic..."))
             topic = topics[selection - 1]
 
+
+            self.Repositity.AddGroupOffset(uuid4(), topic.Partitions[0].Id ,self.GroupId, 0)      
+            topic.Partitions[0].SetOffset(self.GroupId, 0)
+
             self.WorkerThread = Thread(target=asyncio.run, args=(self.ListenOnTopic(topic.Id),))
             self.WorkerThread.start()
+
+
 
       def GetTopics(self):
             topics: list[Topic] = []
@@ -58,8 +72,13 @@ class Consumer():
                   topicPartitions = [x for x in partitions if x[1] == topic.Id]
                   for partition in topicPartitions:
                         topic.Partitions.append(Partition(partition[0],partition[1]))
-
                   topics.append(topic)
+
+                  for partition in topic.Partitions:
+                        groupOffsets = self.Repositity.GetGroupOffset(partition.Id)
+                        for offset in groupOffsets:
+                              partition.Offset[offset[2]] = offset[3]
+
             return topics
 
       def GetBrokerPort(self):
@@ -74,8 +93,9 @@ class Consumer():
                 response = clientSender.Send({
                     "command": "pull",
                     "topicId": topicId,
-                    "groupId": self.GroupId
+                    "groupId": str(self.GroupId)
                 })
-                if (len(response['messages']) > 0):
-                    print(len(response['messages']))
+                if len(response) > 0:
+                  if (len(response['message']) > 0):
+                        print(len(response['message']))
             await asyncio.sleep(1)

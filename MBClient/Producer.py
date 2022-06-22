@@ -46,8 +46,12 @@ class Producer():
                   topicPartitions = [x for x in partitions if x[1] == topic.Id]
                   for partition in topicPartitions:
                         topic.Partitions.append(Partition(partition[0],partition[1]))
-
                   topics.append(topic)
+
+                  for partition in topic.Partitions:
+                        groupOffsets = self.Repositity.GetGroupOffset(partition.Id)
+                        for offset in groupOffsets:
+                              partition.Offset[offset[2]] = offset[3]
 
             return topics
 
@@ -61,8 +65,8 @@ class Producer():
 
       async def CreateMessage(self, topicId, message, brokerPort):
             try:
-                  clientSender = ClientSender(localAddress, 2700)
-                  response = await clientSender.Send({
+                  clientSender =  ClientSender(localAddress, 2700)
+                  response = await clientSender.SendAsync({
                         "topicId": topicId,
                         "message": message
                         })  

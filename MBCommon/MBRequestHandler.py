@@ -13,5 +13,5 @@ class MBRequestHandler(socketserver.BaseRequestHandler):
 
             self.request.sendall(jsonResponse.encode())
         except Exception as exception:
-            jsonResponse = json.dumps({ "code": 500, "message": ("MBRequestHandler error") })
+            jsonResponse = json.dumps({ "code": 500, "data": ("MBRequestHandler error") })
             self.request.sendall(jsonResponse.encode())

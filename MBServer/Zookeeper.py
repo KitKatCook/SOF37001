@@ -54,7 +54,7 @@ class Zookeeper:
         print("1. Start the broker")
         print("2. Add topic")
         print("4. List Topics")
-        print("4. List Messages")
+        print("5. List Messages")
         print("9. Stop")
         user_selection = input()
         self.MenuSelection(user_selection)
@@ -66,9 +66,6 @@ class Zookeeper:
                 self.PrintMenu()
             case "2":
                 self.AddTopic()
-                self.PrintMenu()
-            case "3":
-                self.AddConsumer()
                 self.PrintMenu()
             case "4":
                 self.ListTopics()
@@ -138,28 +135,6 @@ class Zookeeper:
                 for partition in topic.Partitions:
                     for message in partition.Messages:
                         print("Topic: " + topic.Name + "- Partition " + str(topic.Partitions.index(partition) + 1) +": Message - " + message)
-
-    def AddConsumer(self):
-        print("Adding Consumer.\n")
-        groupNameInput = input("Please enter consumer group name:")
-        newConsumer = Consumer(ServerSetupConfig.localAddress, self.Port, groupNameInput)
-        self.Consumers.append(newConsumer)
-        topics = newConsumer.GetTopics()
-        
-        topicIndex = 1
-
-        for topic in topics:
-            print(topicIndex + ": " + topic)
-            topicIndex += 1
-
-        print("\nPlease select a topic.")
-        topicSelectionInput = self.GetMenuInput(self) - 1;
-        
-        selectedTopic = topics[topicSelectionInput]
-
-        consumer_thread = Thread(target=asyncio.run, args=(newConsumer.ListenOnTopic(selectedTopic["Id"]),))
-        consumer_thread.start()
-        print("Consumer created.\n")
 
     def GetMenuInput(self):
         user_input = input()

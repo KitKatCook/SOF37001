@@ -1,10 +1,36 @@
 import tkinter as tk
 from tkinter import *
 from tkinter.ttk import Notebook
+from uuid import uuid4
+from Broker import Broker
+
+from Consumer import Consumer
+from MBRepository import MBRepository
+from Zookeeper import Zookeeper
 
 window = tk.Tk()
 window.minsize(720,480)
 window.title("Message Broker Test Application")
+
+
+
+def RunTest(text):
+    repository = MBRepository()
+
+    zooKeeper = Zookeeper()
+    zooKeeper.CreateDBTables()
+
+    brokerId = uuid4()
+    broker = Broker(brokerId)
+    repository.AddBroker(broker.Id, broker.Port)
+
+    consumer1 = Consumer()
+    consumer1.Create
+    consumer2 = Consumer()
+    consumer3 = Consumer()
+    consumer4 = Consumer()
+
+
 
 def addMessageLogText(text):
     logTabOutput.insert(1.0, text + "\n" )

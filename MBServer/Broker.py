@@ -3,6 +3,7 @@ import json
 from uuid import UUID, uuid3, uuid4
 import uuid
 from BrokerRequestHandler import BrokerRequestHandler
+from MBRepository import MBRepository
 from Partition import Partition
 from PortFactory import PortCheckerFactory
 from Topic import Topic
@@ -17,11 +18,13 @@ class Broker:
     WorkerThread: Thread
     PortCheckerFactory: PortCheckerFactory
     TCPserver: TCPServer
-
+    Repositity: MBRepository
+    
     def __init__(self, id):
         self.Id = id
         self.PortCheckerFactory = PortCheckerFactory()
         self.Topics = []
+        self.Repositity = MBRepository()
         self.Port = 2700 #self.PortCheckerFactory.GetNextPort()
         WorkerThread = Thread(target=asyncio.run, args=(self.StartServer(),))
         WorkerThread.start()
@@ -37,59 +40,69 @@ class Broker:
                 print(e)
 
     def AddMessage(self, messageData):
-        topicId = UUID(messageData['topicId'])
+        topicId = str(UUID(messageData['topicId']))
         body = messageData['message']
-        topic: Topic = self.GetTopicById(topicId)
-
+        topic = [x for x in self.Topics if str(x.Id) == topicId][0]
         for partition in topic.Partitions:
             partition.AddMessage(body)
         
-
         return True
    
     def GetMessages(self, topicId: UUID, groupId: UUID):
-        aggregate_messages = []
-        topic: Topic = self.GetTopicById(topicId)
+        messages = []
+        topic = [x for x in self.Topics if str(x.Id) == topicId][0]
+        
+        groupOffsets = self.Repositity.GetGroupOffset(groupId)
+
         for partition in topic.Partitions:
-            offset = self.GetGroupOffset(partition.Id, groupId)
-            partition_size = partition.size()
-            messages = partition.get_messages(offset, partition_size)
-            aggregate_messages = aggregate_messages + messages
-            self.__set_consumer_group_offset(partition.id, groupId, partition_size)
-        return aggregate_messages
+            #messages = partition.GetMessages(groupId)
+
+            topicOffsets = [x for x in groupOffsets if x[2] == groupId]
+            for offset in topicOffsets:
+                partition.Offset[offset[2]] = offset[3]
+
+            messages = self.GetGroupOffset(topicId, groupId)
+        return messages
 
 
     def AddTopic(self, topicName):
         topicId = uuid4()
         topic: Topic = Topic(topicId, topicName) 
         self.Topics.append(topic)
-        return self.GetTopicById(topic.Id)
+        return topic
 
-    def AddPartition(self, topicId):
-        topic: Topic = self.GetTopicById(topicId)
-        if topic is None:
-            raise("Topic not found")
-        topic.add_partition(topicId)
-        return True
+    def GetTopics(self):
+        topics: list[Topic] = []
+        topicsData = self.Repositity.GetAllTopics()
+        partitions = self.Repositity.GetAllPartitions()
 
-    def GetTopicById(self, id):
-        topic = [topic for topic in self.Topics if topic.Id == id]
-        if(len(topic) > 0):
-            return topic[0]
-        return None
+        for topicData in topicsData:
+                topic = Topic(topicData[0], topicData[1])
+                
+                topic.Partitions = []
+                topicPartitions = [x for x in partitions if x[1] == topic.Id]
+                for partition in topicPartitions:
+                    topic.Partitions.append(Partition(partition[0],partition[1]))
+                topics.append(topic)
 
-        
-    def GetGroupOffset(self, topicId, groupId):
-        topic = self.GetTopicById(topicId)
-        Partition = topic.Partitions[0]
-        offset = Partition.GetMessages(groupId)
+                for partition in topic.Partitions:
+                    groupOffsets = self.Repositity.GetGroupOffset(partition.Id)
+                    for offset in groupOffsets:
+                            partition.Offset[offset[2]] = offset[3]
+
+        return topics
+    
+    def SetGroupOffset(self, topicId, groupId, offset):
+        topic = [x for x in self.Topics if x.Id == topicId][0]
+        partition = topic.Partitions[0]
+        offset = partition.SetOffset(groupId, offset)
         return offset
         
-    def __set_consumer_group_offset(self, partition_id, consumer_group_id, offset):
-        sender: Sender = Sender(WARDEN_ADDRESS, WARDEN_PORT)
-        return sender.send(Message(SET_CONSUMER_GROUP_OFFSET, {
-                "partition_id": str(partition_id),
-                "broker_id": str(self.__broker.id),
-                "consumer_group_id": str(consumer_group_id),
-                "offset": offset,
-            }))
+    def GetGroupOffset(self, topicId, groupId):
+        topic = [x for x in self.Topics if str(x.Id) == topicId][0]
+        partition = topic.Partitions[0]
+        messages = partition.GetMessages(groupId)
+        return messages
+
+
+        

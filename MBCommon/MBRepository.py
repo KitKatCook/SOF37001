@@ -17,6 +17,7 @@ class MBRepository:
             cur.execute(F"DROP TABLE Partition")
             cur.execute(F"DROP TABLE Broker")
             cur.execute(F"DROP TABLE UserGroup")
+            cur.execute(F"DROP TABLE GroupOffset")
         except:
             pass
 
@@ -30,6 +31,9 @@ class MBRepository:
         conn.commit()
 
         cur.execute(f"CREATE TABLE UserGroup (Id UNIQUEIDENTIFIER, Name VARCHAR)")
+        conn.commit()
+
+        cur.execute(f"CREATE TABLE GroupOffset (Id UNIQUEIDENTIFIER, PartitionId UNIQUEIDENTIFIER, GroupId UNIQUEIDENTIFIER, Offset INT)")
         conn.commit()
 
     def AddTopic(self, id, name):
@@ -69,3 +73,19 @@ class MBRepository:
         cur = self.conn.cursor()
         cur.execute("SELECT * FROM UserGroup")
         return cur.fetchall()
+
+    def AddGroupOffset(self, id, partitionId, groupId, offset):
+        self.conn.execute(f"INSERT INTO GroupOffset (Id, PartitionId, GroupId, Offset) VALUES ('{id}', '{partitionId}', '{groupId}', '{offset}')")
+        self.conn.commit()
+
+    def GetGroupOffset(self, groupId):
+        cur = self.conn.cursor()
+        cur.execute(f"SELECT * FROM GroupOffset WHERE GroupId = '{groupId}'")
+        return cur.fetchall()
+
+
+    def SetGroupOffset(self, groupId, offset):
+        cur = self.conn.cursor()
+        cur.execute(f"UPDATE GroupOffset SET Offset = '{offset}' WHERE GroupId = '{groupId}'")
+        self.conn.commit()
+
