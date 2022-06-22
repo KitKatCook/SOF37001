@@ -11,9 +11,10 @@ class Consumer():
       Repositity: MBRepository
       GroupId: UUID
       WorkerThread: Thread
-      
+      BrokerPort: int
       def __init__(self):
             self.Repositity = MBRepository()
+            self.BrokerPort = self.GetBrokerPort()
             self.Create()
            
 
@@ -63,7 +64,7 @@ class Consumer():
 
       def GetBrokerPort(self):
             brokerData = self.Repositity.GetAllBroker()
-            return brokerData[0][0]
+            return brokerData[0][1]
 
       async def ListenOnTopic(self, topicId):
         topic = [x for x in self.GetTopics() if x.Id == topicId][0]

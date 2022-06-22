@@ -51,7 +51,7 @@ class Broker:
         aggregate_messages = []
         topic: Topic = self.GetTopicById(topicId)
         for partition in topic.Partitions:
-            offset = self.__get_consumer_group_offsets(partition.Id, groupId)
+            offset = self.GetGroupOffset(partition.Id, groupId)
             partition_size = partition.size()
             messages = partition.get_messages(offset, partition_size)
             aggregate_messages = aggregate_messages + messages
@@ -81,6 +81,9 @@ class Broker:
         
     def GetGroupOffset(self, topicId, groupId):
         topic = self.GetTopicById(topicId)
+        Partition = topic.Partitions[0]
+        offset = Partition.GetMessages(groupId)
+        return offset
         
     def __set_consumer_group_offset(self, partition_id, consumer_group_id, offset):
         sender: Sender = Sender(WARDEN_ADDRESS, WARDEN_PORT)
