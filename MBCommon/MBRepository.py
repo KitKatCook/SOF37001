@@ -5,10 +5,10 @@ class MBRepository:
     conn: Connection
     
     def __init__(self):
-        self.conn = sqlite3.connect('MBData.sqlite') 
+        self.conn = sqlite3.connect('MBData.sqlite', check_same_thread = False) 
         
     def CreateTables(self):
-        conn = sqlite3.connect('MBData.sqlite')
+        conn = sqlite3.connect('MBData.sqlite', check_same_thread = False)
         
         cur = conn.cursor()
         
