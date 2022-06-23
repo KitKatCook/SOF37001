@@ -32,8 +32,8 @@ class ClientSender():
                 jsonData = json.dumps(message, default=lambda o: o.__dict__, sort_keys=True, indent=4).encode()
                 print(jsonData)
                 mbsocket.sendall(jsonData)
-                data = mbsocket.recv(1024)
-                print(data)
+                data = mbsocket.recv(2048)
+                #print(data)
                 responseString = str(data.decode('UTF-8'))
                 if len(responseString) > 0: 
                     response = json.loads(responseString)
@@ -57,6 +57,6 @@ class ClientSender():
             print(jsonData)
             mbsocket.sendall(jsonData)
             data = mbsocket.recv(1024)
-            print(data)
+            #print(data)
             mbsocket.close()
 

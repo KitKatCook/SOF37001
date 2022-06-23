@@ -25,7 +25,7 @@ class Broker:
         self.PortCheckerFactory = PortCheckerFactory()
         self.Topics = []
         self.Repositity = MBRepository()
-        self.Port = 2700 #self.PortCheckerFactory.GetNextPort()
+        self.Port = 8001 #self.PortCheckerFactory.GetNextPort()
         WorkerThread = Thread(target=asyncio.run, args=(self.StartServer(),))
         WorkerThread.start()
         
