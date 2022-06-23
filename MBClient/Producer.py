@@ -65,7 +65,7 @@ class Producer():
 
       async def CreateMessage(self, topicId, message, brokerPort):
             try:
-                  clientSender =  ClientSender(localAddress, 2700)
+                  clientSender =  ClientSender(localAddress, 8001)
                   response = await clientSender.SendAsync({
                         "topicId": topicId,
                         "message": message

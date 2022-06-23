@@ -1,3 +1,5 @@
+import asyncio
+from threading import Thread
 import tkinter as tk
 from tkinter import *
 from tkinter.ttk import Notebook
@@ -6,6 +8,7 @@ from Broker import Broker
 
 from Consumer import Consumer
 from MBRepository import MBRepository
+from Topic import Topic
 from Zookeeper import Zookeeper
 
 window = tk.Tk()
@@ -20,15 +23,21 @@ def RunTest(text):
     zooKeeper = Zookeeper()
     zooKeeper.CreateDBTables()
 
+    brokerPort = 8000
     brokerId = uuid4()
     broker = Broker(brokerId)
     repository.AddBroker(broker.Id, broker.Port)
 
-    consumer1 = Consumer()
-    consumer1.Create
-    consumer2 = Consumer()
-    consumer3 = Consumer()
-    consumer4 = Consumer()
+    topic: Topic = broker.AddTopic()
+
+    consumer1 = Consumer("group1")
+    consumer1Thread = Thread(target=asyncio.run, args=(consumer1.ListenOnTopic([topic.Id], addMessageCg1),))
+    consumer2 = Consumer("group1")
+    consumer2Thread = Thread(target=asyncio.run, args=(consumer2.ListenOnTopic([topic.Id], addMessageCg1),))
+    consumer3 = Consumer("group2")
+    consumer3Thread = Thread(target=asyncio.run, args=(consumer3.ListenOnTopic([topic.Id], addMessageCg1),))
+    consumer4 = Consumer("group2")
+    consumer4Thread = Thread(target=asyncio.run, args=(consumer4.ListenOnTopic([topic.Id], addMessageCg1),))
 
 
 

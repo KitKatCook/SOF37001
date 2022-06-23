@@ -126,6 +126,7 @@ class Zookeeper:
 
     def ListTopics(self):
         for broker in self.Brokers:
+            print("\nTopics:")
             for topic in broker.Topics:
                 print(topic.Name)
 
