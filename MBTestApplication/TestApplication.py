@@ -1,9 +1,6 @@
 import asyncio
-<<<<<<< HEAD
-=======
 import os
 import sys
->>>>>>> 284335879c83f4b69253fae68b1e06efb5c76762
 from threading import Thread
 import tkinter as tk
 from tkinter import *
@@ -17,11 +14,8 @@ sys.path.append(f"{os.getcwd()}/MBCommon")
 from Broker import Broker
 from Consumer import Consumer
 from MBRepository import MBRepository
-<<<<<<< HEAD
 from Topic import Topic
-=======
 from Producer import Producer
->>>>>>> 284335879c83f4b69253fae68b1e06efb5c76762
 from Zookeeper import Zookeeper
 
 window = tk.Tk()
@@ -41,7 +35,6 @@ def RunTest():
     broker = Broker(brokerId)
     repository.AddBroker(broker.Id, broker.Port)
 
-<<<<<<< HEAD
     topic: Topic = broker.AddTopic()
 
     consumer1 = Consumer("group1")
@@ -52,14 +45,12 @@ def RunTest():
     consumer3Thread = Thread(target=asyncio.run, args=(consumer3.ListenOnTopic([topic.Id], addMessageCg1),))
     consumer4 = Consumer("group2")
     consumer4Thread = Thread(target=asyncio.run, args=(consumer4.ListenOnTopic([topic.Id], addMessageCg1),))
-=======
     topic = broker.AddTopic("topic1")
     repository.AddTopic(topic.Id, topic.Name)
     
     for partition in topic.Partitions:
         partitionId:uuid4 = partition.Id
         repository.AddPartition(partitionId, topic.Id)
->>>>>>> 284335879c83f4b69253fae68b1e06efb5c76762
 
     consumer1 = Consumer("Group1",True)
     consumer2 = Consumer("Group1",True)

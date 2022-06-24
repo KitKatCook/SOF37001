@@ -8,7 +8,7 @@ sys.path.append(f"{os.getcwd()}/MBCommon")
 from Zookeeper import Zookeeper
 
 def main():
-    Zookeeper()
+    Zookeeper(True)
     
 if __name__ == "__main__":
     main()
