@@ -30,9 +30,9 @@ class ClientSender():
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as mbsocket:
                 mbsocket.connect((self.Address, self.Port))
                 jsonData = json.dumps(message, default=lambda o: o.__dict__, sort_keys=True, indent=4).encode()
-                print(jsonData)
+                #print(jsonData)
                 mbsocket.sendall(jsonData)
-                data = mbsocket.recv(2048)
+                data = mbsocket.recv(20480)
                 #print(data)
                 responseString = str(data.decode('UTF-8'))
                 if len(responseString) > 0: 

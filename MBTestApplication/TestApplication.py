@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 from threading import Thread
+import time
 import tkinter as tk
 from tkinter import *
 from tkinter.ttk import Notebook
@@ -18,11 +19,17 @@ from Topic import Topic
 from Producer import Producer
 from Zookeeper import Zookeeper
 
+StartTime = time.time()
+
 window = tk.Tk()
 window.minsize(720,480)
 window.title("Message Broker Test Application")
 
-
+def GetSeconds(sec):
+    sec = sec % 60
+    mins = mins % 60
+    hours = mins // 60
+    return ("{0}".format(sec))
 
 def RunTest():
     repository = MBRepository()
@@ -35,50 +42,54 @@ def RunTest():
     broker = Broker(brokerId)
     repository.AddBroker(broker.Id, broker.Port)
 
-    topic: Topic = broker.AddTopic()
-
-    consumer1 = Consumer("group1")
-    consumer1Thread = Thread(target=asyncio.run, args=(consumer1.ListenOnTopic([topic.Id], addMessageCg1),))
-    consumer2 = Consumer("group1")
-    consumer2Thread = Thread(target=asyncio.run, args=(consumer2.ListenOnTopic([topic.Id], addMessageCg1),))
-    consumer3 = Consumer("group2")
-    consumer3Thread = Thread(target=asyncio.run, args=(consumer3.ListenOnTopic([topic.Id], addMessageCg1),))
-    consumer4 = Consumer("group2")
-    consumer4Thread = Thread(target=asyncio.run, args=(consumer4.ListenOnTopic([topic.Id], addMessageCg1),))
     topic = broker.AddTopic("topic1")
     repository.AddTopic(topic.Id, topic.Name)
-    
+        
     for partition in topic.Partitions:
         partitionId:uuid4 = partition.Id
         repository.AddPartition(partitionId, topic.Id)
 
-    consumer1 = Consumer("Group1",True)
-    consumer2 = Consumer("Group1",True)
-    consumer3 = Consumer("Group2",True)
-    consumer4 = Consumer("Group2",True)
+    consumer1 = Consumer("group1",True)
+    consumer1Thread = Thread(target=asyncio.run, args=(consumer1.ListenOnTopic(str(topic.Id), PrintConsumerMessage),))
+    consumer1Thread.start()
+    consumer2 = Consumer("group1",True)
+    consumer2Thread = Thread(target=asyncio.run, args=(consumer2.ListenOnTopic(str(topic.Id), PrintConsumerMessage),))
+    consumer2Thread.start()
+    consumer3 = Consumer("group2",True)
+    consumer3Thread = Thread(target=asyncio.run, args=(consumer3.ListenOnTopic(str(topic.Id), PrintConsumerMessage),))
+    consumer3Thread.start()
+    consumer4 = Consumer("group2",True)
+    consumer4Thread = Thread(target=asyncio.run, args=(consumer4.ListenOnTopic(str(topic.Id), PrintConsumerMessage),))
+    consumer4Thread.start()
+    
 
     for i in range(0,100):
         message = f"Message: {i}, TopicId: {topic.Id}"
         producer = Producer(True)
         producer.SendMessage(topic.Id, message, broker.Port)
-        logTabOutput.insert(1.0, message + "\n" )
 
-def addMessageLogText(text):
-    logTabOutput.insert(1.0, text + "\n" )
+    end = time.time()
+    result.config(text = "Result (s): " + GetSeconds(end - StartTime))
+
+def PrintConsumerMessage(text):
+
+    if isinstance(text, list):
+        for message in text:
+            logTabOutput.insert(1.0, message + "\n" )
+    else:
+        logTabOutput.insert(1.0, text + "\n" )
+
 
 def addErrorLogText(text):
-    errorTabOutput.insert(1.0, text + "\n" )
-
-def setResultsTime(text):
-    errorTabOutput.insert(1.0, text + "\n" )
-
-def setResultsMessages(text):
     errorTabOutput.insert(1.0, text + "\n" )
 
 greeting = tk.Label(text="Welcome")
 greeting.pack()
 
 runButton = tk.Button(window, text = 'Run Test!', command=lambda:RunTest()).pack()
+
+result = tk.Label(text="Result (s): ")
+result.pack()
 
 tabparent = Notebook(window)
 
@@ -113,10 +124,7 @@ errorTabOutputScrollBar.pack(side=tk.RIGHT, fill='y')
 errorTabOutputScrollBar.config(command=errorTabOutput.yview)
 
 
-
 timeResults = tk.Entry(window, )
 
 
 window.mainloop()
-
-

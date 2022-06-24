@@ -1,7 +1,18 @@
 import json
 import socketserver
 
+## BrokerRequestHandler class.
+#  @author  Kit Cook
+#  @version 1.0
+#  @date    22/06/2022
+#  @bug     No known bugs.
+#  
+#  @details This class handles requests made.
 class BrokerRequestHandler(socketserver.BaseRequestHandler):
+    
+    ## handle method.
+    #  @param self The class pointer.
+    #  @details decodes json data and sends back a response.
     def handle(self):
         self.data = self.request.recv(128000).strip()
         try:
