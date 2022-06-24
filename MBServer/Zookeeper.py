@@ -25,14 +25,14 @@ class Zookeeper:
     Consumers: list[Consumer]
     Repository: MBRepository
 
-    def __init__(self, args = None):
-        self.args = args
+    def __init__(self, startMenu = None):
         self.Brokers = []
         self.Consumers = []
         thread = Thread(target=asyncio.run, args=(self.StartServer(),))
         thread.start()
         self.CreateDBTables()
-        self.PrintMenu()
+        if startMenu is not None:
+            self.PrintMenu()
 
     async def StartServer(self):
         print("Server starting...")

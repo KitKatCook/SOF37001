@@ -1,14 +1,27 @@
 import asyncio
+<<<<<<< HEAD
+=======
+import os
+import sys
+>>>>>>> 284335879c83f4b69253fae68b1e06efb5c76762
 from threading import Thread
 import tkinter as tk
 from tkinter import *
 from tkinter.ttk import Notebook
 from uuid import uuid4
-from Broker import Broker
 
+sys.path.append(f"{os.getcwd()}/MBServer")
+sys.path.append(f"{os.getcwd()}/MBClient")
+sys.path.append(f"{os.getcwd()}/MBCommon")
+
+from Broker import Broker
 from Consumer import Consumer
 from MBRepository import MBRepository
+<<<<<<< HEAD
 from Topic import Topic
+=======
+from Producer import Producer
+>>>>>>> 284335879c83f4b69253fae68b1e06efb5c76762
 from Zookeeper import Zookeeper
 
 window = tk.Tk()
@@ -17,9 +30,9 @@ window.title("Message Broker Test Application")
 
 
 
-def RunTest(text):
+def RunTest():
     repository = MBRepository()
-
+    repository.CreateTables()
     zooKeeper = Zookeeper()
     zooKeeper.CreateDBTables()
 
@@ -28,6 +41,7 @@ def RunTest(text):
     broker = Broker(brokerId)
     repository.AddBroker(broker.Id, broker.Port)
 
+<<<<<<< HEAD
     topic: Topic = broker.AddTopic()
 
     consumer1 = Consumer("group1")
@@ -38,8 +52,25 @@ def RunTest(text):
     consumer3Thread = Thread(target=asyncio.run, args=(consumer3.ListenOnTopic([topic.Id], addMessageCg1),))
     consumer4 = Consumer("group2")
     consumer4Thread = Thread(target=asyncio.run, args=(consumer4.ListenOnTopic([topic.Id], addMessageCg1),))
+=======
+    topic = broker.AddTopic("topic1")
+    repository.AddTopic(topic.Id, topic.Name)
+    
+    for partition in topic.Partitions:
+        partitionId:uuid4 = partition.Id
+        repository.AddPartition(partitionId, topic.Id)
+>>>>>>> 284335879c83f4b69253fae68b1e06efb5c76762
 
+    consumer1 = Consumer("Group1",True)
+    consumer2 = Consumer("Group1",True)
+    consumer3 = Consumer("Group2",True)
+    consumer4 = Consumer("Group2",True)
 
+    for i in range(0,100):
+        message = f"Message: {i}, TopicId: {topic.Id}"
+        producer = Producer(True)
+        producer.SendMessage(topic.Id, message, broker.Port)
+        logTabOutput.insert(1.0, message + "\n" )
 
 def addMessageLogText(text):
     logTabOutput.insert(1.0, text + "\n" )
@@ -56,7 +87,7 @@ def setResultsMessages(text):
 greeting = tk.Label(text="Welcome")
 greeting.pack()
 
-runButton = tk.Button(window, text = 'Run Test!', command=lambda:addMessageLogText("new content")).pack()
+runButton = tk.Button(window, text = 'Run Test!', command=lambda:RunTest()).pack()
 
 tabparent = Notebook(window)
 

@@ -15,15 +15,14 @@ class Consumer():
       BrokerPort: int
       GroupName : string
 
-      def __init__(self, groupName = None):
+      def __init__(self, groupName = None, test = None):
             self.Repositity = MBRepository()
             self.BrokerPort = self.GetBrokerPort()
             self.GroupName = groupName
-            self.Create()
+            self.Create(test)
            
 
-      def Create(self):
-            groupNameInput = ""
+      def Create(self, test = None):
             if self.GroupName is None:
                   groupNameInput = input('Please enter a consumer group name...\n')
             else:
@@ -47,9 +46,12 @@ class Consumer():
             for t in topics:
                   print(str(i) +": " + t.Name)
                   i += 1
-
-            selection = int(input("Please select a topic..."))
-            topic = topics[selection - 1]
+            
+            if test is None:
+                  selection = int(input("Please select a topic..."))
+                  topic = topics[selection - 1]
+            else:
+                  topic = topics[0]
 
 
             self.Repositity.AddGroupOffset(uuid4(), topic.Partitions[0].Id ,self.GroupId, 0)      
@@ -95,7 +97,7 @@ class Consumer():
                     "topicId": topicId,
                     "groupId": str(self.GroupId)
                 })
-                if len(response) > 0:
+                if response is not None and len(response) > 0:
                   if (len(response['message']) > 0):
-                        print(len(response['message']))
-            await asyncio.sleep(1)
+                        print(response['message'])
+            await asyncio.sleep(0.1)

@@ -12,27 +12,32 @@ from Topic import *
 class Producer():
       Repositity: MBRepository
 
-      def __init__(self):
+      def __init__(self, test = None):
             self.Repositity = MBRepository()
-            self.Create()
+            self.Create(test)
 
-      def Create(self):
+      def Create(self, test):
             brokerPort = self.GetBrokerPort()
             topics = self.GetTopics()
             index = 1
-            for t in topics:
-                  print(str(index) +": " + t.Name)
-                  index += 1
             
-            topicInput = int(input("Please select a topic. \n")) -1
+            if test is None:
+      
+                  for t in topics:
+                        print(str(index) +": " + t.Name)
+                        index += 1
+                  topicInput = int(input("Please select a topic. \n")) -1
+                  topicIndex = (topicInput)
+                  topic = topics[topicIndex]
+            else:
+                  topic = topics[0]
 
-            topicIndex = (topicInput)
-            topic = topics[topicIndex]
             topicId = topic.Id
 
-            messageInput = input("Please enter a message. \n")
-            
-            self.SendMessage(topicId, messageInput,brokerPort)
+            if test is None:
+                  messageInput = input("Please enter a message. \n")
+                  
+                  self.SendMessage(topicId, messageInput,brokerPort)
 
       def GetTopics(self):
             topics: list[Topic] = []
@@ -67,7 +72,7 @@ class Producer():
             try:
                   clientSender =  ClientSender(localAddress, 8001)
                   response = await clientSender.SendAsync({
-                        "topicId": topicId,
+                        "topicId": str(topicId),
                         "message": message
                         })  
                   return response
